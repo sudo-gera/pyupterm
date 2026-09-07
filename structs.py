@@ -89,3 +89,4 @@ class file_info:
     os: str
     arch: str
     url: str
+    name: str

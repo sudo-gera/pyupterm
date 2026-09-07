@@ -11,6 +11,7 @@ import tarfile
 import io
 import tempfile
 import subprocess
+import shutil
 
 import download
 import structs
@@ -65,8 +66,15 @@ def main(tag_name: str) -> None:
                         os=os,
                         arch=arch,
                         url=asset.browser_download_url,
+                        name=asset.name,
                     )
                 )
+
+    build_root = repo_root / '.build'
+    shutil.rmtree(build_root, ignore_errors=True)
+    build_root.mkdir(parents=True, exist_ok=True)
+    package_root = build_root / 'pyupterm'
+    shutil.copytree(repo_root / 'skel' / 'pyupterm', package_root)
 
     for file in files:
         data = loader.permanent.download_bytes(file.url)
@@ -91,11 +99,11 @@ def main(tag_name: str) -> None:
                                 temp_file.flush()
                                 for command in [
                                     ['file', temp_file.name],
-                                    # ['ldd', temp_file.name],
-                                    ['readelf', temp_file.name],
+                                    ['ldd', temp_file.name],
+                                    ['readelf', '-l', temp_file.name],
                                 ]:
                                     print(command)
-                                    subprocess.run(command, check=True)
+                                    subprocess.run(command)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
